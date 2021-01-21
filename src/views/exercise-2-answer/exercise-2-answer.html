@@ -1,0 +1,81 @@
+{% extends "views/_base/base.html" %}
+
+{% block navigation %}
+	<nav class="cc-navigation">
+		<a href="/exercise-2/" class="cc-back-link">&#8592; back to exercise</a>
+	</nav>
+{% endblock %}
+
+{% block introduction %}
+	<h1>Placement on multiple screens</h1>
+	<p>The presentation should open on the primary screen, the notes on one of your other screens</p>
+{% endblock %}
+
+{% block html %}
+	<section class="cc-html-playground">
+		<button class="toggle">Start presentation</button>
+	</section>
+{% endblock %}
+
+{% block styles %}
+	<style type="text/css">
+		button {
+			padding: 1rem;
+			background-color: palegoldenrod;
+			border: 2px solid goldenrod;
+			border-radius: 0.5rem;
+		}
+
+		svg {
+			width: 800px;
+		}
+	</style>
+{% endblock %}
+
+{% block scripts %}
+	<script type="module">
+		const isSupported = "getScreens" in window
+		const $button = document.querySelector('.toggle')
+
+		function openUrlOnScreen(url, screen) {
+			const { left, top, availWidth, availHeight } = screen
+
+			const features = [
+				`left=${left}`,
+				`top=${top}`,
+				`width=${availWidth}`,
+				`height=${availHeight}`,
+				`menubar=no`,
+				`toolbar=no`,
+				`location=no`,
+				`status=no`,
+				`resizable=yes`,
+				`scrollbars=no`
+			].join(",");
+
+			window.open(url, '', features)
+		}
+
+		async function openScreens() {
+			if (isSupported && await window.isMultiScreen()) {
+				const screens = await window.getScreens()
+				const primaryScreen = screens.find(screen => screen.primary)
+				const secondScreen = screens.find(screen => !screen.primary)
+
+				openUrlOnScreen('/assets/dummy-pages/presentation.html', primaryScreen)
+				openUrlOnScreen('/assets/dummy-pages/speaker-notes.html', secondScreen)
+			}	else {
+				const screen = window.screen
+
+				openUrlOnScreen('/assets/dummy-pages/presentation.html', screen)
+				openUrlOnScreen('/assets/dummy-pages/speaker-notes.html', screen)
+			}
+		}
+
+		function init() {
+			$button.addEventListener('click', openScreens)
+		}
+
+		init()
+	</script>
+{% endblock %}

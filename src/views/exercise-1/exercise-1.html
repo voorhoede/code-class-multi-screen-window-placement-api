@@ -1,0 +1,51 @@
+{% extends "views/_base/base.html" %}
+
+{% block navigation %}
+	<nav class="cc-navigation">
+		<a href="/" class="cc-back-link">&#8592; back to overview</a>
+		<a href="/exercise-1-answer/" class="cc-answer-link">See answer &#8594;</a>
+	</nav>
+{% endblock %}
+
+{% block introduction %}
+	<h1>Getting information</h1>
+	<p>Get the information of the screen placement so the visualisation shows your screens.</p>
+{% endblock %}
+
+{% block html %}
+	<section class="cc-html-playground">
+		<svg viewBox="0 0 200 200" class="visualization" xmlns="http://www.w3.org/2000/svg"></svg>
+	</section>
+{% endblock %}
+
+{% block styles %}
+	<style type="text/css">
+		svg {
+			width: 800px;
+		}
+	</style>
+{% endblock %}
+
+{% block scripts %}
+	<script type="module">
+		import { renderScreensSvg } from '/assets/js/renderScreensSvg.js'
+
+		async function init () {
+			const $button = document.querySelector('.toggle')
+			const $svg = document.querySelector('.visualization')
+			
+			if (false /* TODO: check if getScreens is available*/) {
+				// TODO: retrieve an array of the screens
+				renderScreensSvg([/* TODO: pass the screens to the function here */], $svg)
+				
+				// TODO: use the 'screenschange' event to update the svg 
+				// when the screen order changes
+			} else {
+				screen = window.screen
+				renderScreensSvg([screen], $svg)
+			}
+		}
+
+		init()
+	</script>
+{% endblock %}

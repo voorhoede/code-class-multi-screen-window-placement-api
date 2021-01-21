@@ -1,0 +1,104 @@
+{% extends "views/_base/base.html" %}
+
+{% block navigation %}
+	<nav class="cc-navigation">
+		<a href="/" class="cc-back-link">&#8592; back to overview</a>
+		<a href="/exercise-3-answer/" class="cc-answer-link">See answer &#8594;</a>
+	</nav>
+{% endblock %}
+
+{% block introduction %}
+<h1>Combine with 'fullscreen' functionality</h1>
+<p>Open <code>src/assets/dummy-pages/stock.html</code> an make sure the 
+	fullscreen button opens the page on the primary screen</p>
+{% endblock %}
+
+{% block html %}
+<section class="cc-html-playground">
+	<button class="toggle">Open dashboard 📈</button>
+</section>
+{% endblock %}
+
+{% block styles %}
+<style type="text/css">
+	button {
+		padding: 1rem;
+		background-color: palegoldenrod;
+		border: 2px solid goldenrod;
+		border-radius: 0.5rem;
+	}
+
+	svg {
+		width: 800px;
+	}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script type="module">
+	/*
+		TODO: go to src/assets/dummy-pages/stock.html
+	*/
+	const isSupported = () => "getScreens" in window;
+	const $button = document.querySelector(".toggle");
+	const WINDOW_CHROME_Y = 51;
+	const WINDOW_CHROME_X = 1;
+
+	function openUrlOnScreen({ url, left, top, width, height }) {
+		const features = [
+			`left=${left}`,
+			`top=${top}`,
+			`width=${width}`,
+			`height=${height}`,
+			`menubar=no`,
+			`toolbar=no`,
+			`location=no`,
+			`status=no`,
+			`resizable=yes`,
+			`scrollbars=no`,
+		].join(",");
+
+		window.open(url, "", features);
+	}
+
+	async function openScreens() {
+		if (!isSupported()) {
+			return;
+		}
+
+		const res = await fetch(
+			"http://localhost:8010/proxy/screener/stocks?tableonly=true&limit=18"
+		);
+		const { data } = await res.json();
+		const stocks = data.table.rows.map((stock) => stock.symbol);
+		const screens = await window.getScreens();
+		const perScreen = Math.ceil(stocks.length / screens.length);
+
+		screens.forEach((screen, screenIndex) => {
+			const { left, top, availWidth, availHeight } = screen;
+			const rowCount = Math.ceil(Math.sqrt(perScreen));
+			const windowWidth = availWidth / rowCount - WINDOW_CHROME_X;
+			const windowHeight = availHeight / rowCount - WINDOW_CHROME_Y;
+			let stockIndex = 0;
+
+			for (let i = 0; i < perScreen; i++) {
+				const windowIndex = screenIndex * 10 + i;
+				const col = i % rowCount
+				const row = Math.floor(i / rowCount)
+				const screenX = left + col * windowWidth + col * WINDOW_CHROME_X
+				const screenY = top + row * windowHeight + row * WINDOW_CHROME_Y
+
+				openUrlOnScreen({
+					url: `http://localhost:3000/assets/dummy-pages/stock.html?symbol=${stocks[stockIndex++]}&index=${i}`,
+					width: windowWidth,
+					height: windowHeight,
+					left: screenX,
+					top: screenY
+				});
+			}
+		});
+	}
+
+	$button.addEventListener("click", openScreens);
+</script>
+{% endblock %}

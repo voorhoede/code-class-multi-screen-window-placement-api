@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stocks</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    .container {
+      background-color: white;
+      height: 100vh;
+      padding: 1rem;
+    }
+
+    .hide {
+      display: none;
+    }
+  </style>
+  <meta http-equiv="origin-trial"
+    content="Aqre4+1r8MQANAEsbql0rAuyyhNx/se2TYXYALmghVW33AG5uNkfkLEtx+OYBlqmkOTyuzXoJhajGXz4f95XgQkAAABSeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJmZWF0dXJlIjoiV2luZG93UGxhY2VtZW50IiwiZXhwaXJ5IjoxNjEyNDI4Mzk1fQ==">
+</head>
+<body>
+  <div class="container">
+    <h1 class="title"></h1>
+  
+    <button class="fullscreen">Go full screen!</button>
+  
+    <canvas class="chart"></div>
+  </div>
+
+  <script>
+    const $title = document.querySelector('.title') 
+    const $chart = document.querySelector('.chart').getContext('2d') 
+    const $container = document.querySelector('body')
+    const $fullscreenTrigger = document.querySelector('.fullscreen')
+    const params = new URLSearchParams(window.location.search)
+    const symbol = params.get('symbol')
+
+    $fullscreenTrigger.addEventListener('click', async () => {
+      // TODO: get the primary screen
+      // TODO: make $container fullscreen using requestFullscreen on the primary screen
+    })
+
+    document.addEventListener('fullscreenchange', (event) => {
+      $fullscreenTrigger.classList[document.fullscreenElement ? 'add' : 'hide']('hide')
+    });
+
+    async function init() {
+      const res = await fetch(`http://localhost:8010/proxy/quote/${symbol}/chart?assetclass=stocks&fromdate=2020-06-28&todate=2020-12-28`);
+      const { data } = await res.json();
+
+      $title.innerText = data.company
+
+      const chart = new Chart($chart, {
+        type: 'line',
+        data: {
+          labels: data.chart.map(item => item.z.dateTime),
+          datasets: [{
+            label: data.symbol,
+            borderColor: "#"+((1<<24)*Math.random()|0).toString(16),
+            data: data.chart.map(item => item.y)
+          }]
+        } 
+      });
+    }
+    
+    init()
+  </script>  
+</body>
+</html>

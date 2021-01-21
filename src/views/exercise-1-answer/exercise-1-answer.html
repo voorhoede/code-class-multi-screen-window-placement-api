@@ -1,0 +1,59 @@
+{% extends "views/_base/base.html" %}
+
+{% block navigation %}
+	<nav class="cc-navigation">
+		<a href="/exercise-1/" class="cc-back-link">&#8592; back to exercise</a>
+	</nav>
+{% endblock %}
+
+{% block introduction %}
+	<h1>Getting information</h1>
+	<p>Get the information of the screen placement so the visualisation shows your screens.</p>
+{% endblock %}
+
+{% block html %}
+	<section class="cc-html-playground">
+		<svg viewBox="0 0 200 200" class="visualization" xmlns="http://www.w3.org/2000/svg"></svg>
+	</section>
+{% endblock %}
+
+{% block styles %}
+	<style type="text/css">
+		button {
+			padding: 1rem;
+			background-color: palegoldenrod;
+			border: 2px solid goldenrod;
+			border-radius: 0.5rem;
+		}
+
+		svg {
+			width: 800px;
+		}
+	</style>
+{% endblock %}
+
+{% block scripts %}
+	<script type="module">
+		import { renderScreensSvg } from '/assets/js/renderScreensSvg.js'
+
+		async function init () {
+			const $button = document.querySelector('.toggle')
+			const $svg = document.querySelector('.visualization')
+			
+			if ("getScreens" in window) {
+				let screens = await window.getScreens()
+				renderScreensSvg(screens, $svg)
+	
+				window.addEventListener('screenschange', async (event) => {
+					screens = await window.getScreens()
+					renderScreensSvg(screens, $svg)
+				});
+			} else {
+				screen = window.screen
+				renderScreensSvg([screen], $svg)
+			}
+		}
+
+		init()
+	</script>
+{% endblock %}
