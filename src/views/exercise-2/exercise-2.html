@@ -8,25 +8,18 @@
 {% endblock %}
 
 {% block introduction %}
-	<h1>Placement on multiple screens</h1>
-	<p>The presentation should open on the primary screen, the notes on one of your other screens</p>
+	<h1>Keeping track of changes</h1>
+	<p>When the screen setup changes, the visualisation should update.</p>
 {% endblock %}
 
 {% block html %}
 	<section class="cc-html-playground">
-		<button class="toggle">Start presentation</button>
+		<svg viewBox="0 0 200 200" class="visualization" xmlns="http://www.w3.org/2000/svg"></svg>
 	</section>
 {% endblock %}
 
 {% block styles %}
 	<style type="text/css">
-		button {
-			padding: 1rem;
-			background-color: palegoldenrod;
-			border: 2px solid goldenrod;
-			border-radius: 0.5rem;
-		}
-
 		svg {
 			width: 800px;
 		}
@@ -35,47 +28,22 @@
 
 {% block scripts %}
 	<script type="module">
-		const isSupported = "getScreens" in window
-		const $button = document.querySelector('.toggle')
+		import { renderScreensSvg } from '/assets/js/renderScreensSvg.js'
 
-		function openUrlOnScreen(url, screen) {
-			const { left, top, availWidth, availHeight } = screen
-
-			const features = [
-				`left=${left}`,
-				`top=${top}`,
-				`width=${availWidth}`,
-				`height=${availHeight}`,
-				`menubar=no`,
-				`toolbar=no`,
-				`location=no`,
-				`status=no`,
-				`resizable=yes`,
-				`scrollbars=no`
-			].join(",");
-
-			window.open(url, '', features)
-		}
-
-		async function openScreens() {
-			// TODO: add extra check to determine if we're using multiple screens
-			if (isSupported) {
-				const screens = await window.getScreens()
-				const primaryScreen = false /* TODO: assign this const to the primary screen */
-				const secondScreen = false /* TODO: assign this const to a non-primary screen */
-
-				openUrlOnScreen('/assets/dummy-pages/presentation.html', primaryScreen)
-				openUrlOnScreen('/assets/dummy-pages/speaker-notes.html', secondScreen)
-			}	else {
-				const screen = window.screen
-
-				openUrlOnScreen('/assets/dummy-pages/presentation.html', screen)
-				openUrlOnScreen('/assets/dummy-pages/speaker-notes.html', screen)
+		async function init () {
+			const $button = document.querySelector('.toggle')
+			const $svg = document.querySelector('.visualization')
+			
+			if ("getScreens" in window) {
+				let screens = await window.getScreens()
+				renderScreensSvg(screens, $svg)
+	
+				// TODO: use the 'screenschange' event to update the svg 
+				// when the screen order changes
+			} else {
+				screen = window.screen
+				renderScreensSvg([screen], $svg)
 			}
-		}
-
-		function init() {
-			$button.addEventListener('click', openScreens)
 		}
 
 		init()

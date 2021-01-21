@@ -43,11 +43,6 @@
 			if ("getScreens" in window) {
 				let screens = await window.getScreens()
 				renderScreensSvg(screens, $svg)
-	
-				window.addEventListener('screenschange', async (event) => {
-					screens = await window.getScreens()
-					renderScreensSvg(screens, $svg)
-				});
 			} else {
 				screen = window.screen
 				renderScreensSvg([screen], $svg)
